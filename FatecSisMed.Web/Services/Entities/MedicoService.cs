@@ -18,10 +18,11 @@ public class MedicoService : IMedicoService
 
     private const string apiEndpoint = "/api/medico/";
 
-    public async Task<MedicoViewModel> CreateMedico(MedicoViewModel medico)
+    public async Task<MedicoViewModel> CreateMedico(MedicoViewModel medico, string token)
     {
         var client = _clientFactory.CreateClient("MedicoAPI");
-
+        PutTokenInHeaderAuthorization(token, client);
+        
         StringContent content = new StringContent(JsonSerializer.Serialize(medico), Encoding.UTF8, "application/json");
 
         using (var response = await client.PostAsync(apiEndpoint, content))
@@ -35,9 +36,10 @@ public class MedicoService : IMedicoService
         }
     }
 
-    public async Task<bool> DeleteMedicoById(int id)
+    public async Task<bool> DeleteMedicoById(int id, string token)
     {
         var client = _clientFactory.CreateClient("MedicoAPI");
+        PutTokenInHeaderAuthorization(token, client);
 
         using (var response = await client.DeleteAsync(apiEndpoint + id))
         {
@@ -45,9 +47,11 @@ public class MedicoService : IMedicoService
         }
     }
 
-    public async Task<MedicoViewModel> FindMedicoById(int id)
+    public async Task<MedicoViewModel> FindMedicoById(int id, string token)
     {
         var client = _clientFactory.CreateClient("MedicoAPI");
+        PutTokenInHeaderAuthorization(token, client);
+
         using (var response = await client.GetAsync(apiEndpoint + id))
         {
             if (response.IsSuccessStatusCode && response.Content is not null)
@@ -59,9 +63,10 @@ public class MedicoService : IMedicoService
         }
     }
 
-    public async Task<IEnumerable<MedicoViewModel>> GetAllMedicos()
+    public async Task<IEnumerable<MedicoViewModel>> GetAllMedicos(string token)
     {
         var client = _clientFactory.CreateClient("MedicoAPI");
+        PutTokenInHeaderAuthorization(token, client);
 
         var response = await client.GetAsync(apiEndpoint);
 
@@ -73,10 +78,10 @@ public class MedicoService : IMedicoService
         return null;
     }
 
-    public async Task<MedicoViewModel> UpdateMedico(MedicoViewModel medicoViewModel)
+    public async Task<MedicoViewModel> UpdateMedico(MedicoViewModel medicoViewModel, string token)
     {
         var client = _clientFactory.CreateClient("MedicoAPI");
-
+        PutTokenInHeaderAuthorization(token, client);
         MedicoViewModel medico = new MedicoViewModel();
 
         using (var response = await client.PutAsJsonAsync(apiEndpoint, medicoViewModel))
@@ -89,5 +94,11 @@ public class MedicoService : IMedicoService
             return null;
         }
 
+    }
+
+    private static void PutTokenInHeaderAuthorization(string token, HttpsClient client)
+    {
+        cliente.DefaultRequestHeaders.Authorization = 
+            new AuthenticationHeaderValue("Bearer", token);
     }
 }
